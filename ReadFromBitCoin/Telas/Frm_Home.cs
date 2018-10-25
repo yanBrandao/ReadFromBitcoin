@@ -19,6 +19,7 @@ namespace ReadFromBitCoin
 
         string requestMercadoBitcoin = "https://www.mercadobitcoin.net/api/";
         bool runningTaskMercado = false;
+        bool runningTaskTrades = false;
 
         public Frm_Home()
         {
@@ -27,14 +28,14 @@ namespace ReadFromBitCoin
 
         private void btnMercadoBitCoin_Click(object sender, EventArgs e)
         {
-            if (btnMercadoBitCoin.Text.Equals("Stop"))
+            if (btnTicker.Text.Equals("Stop"))
             {
-                btnMercadoBitCoin.Text = "Mercado Bitcoin";
+                btnTicker.Text = "Ticker";
                 runningTaskMercado = false;
             }
             else
             {
-                btnMercadoBitCoin.Text = "Stop";
+                btnTicker.Text = "Stop";
                 runningTaskMercado = true;
                 Task.Factory.StartNew(() => { ReadJSON(); });
             }
@@ -45,20 +46,29 @@ namespace ReadFromBitCoin
         {
             while (runningTaskMercado)
             {
-                Request(Enumeraveis.Moedas.BTC);
+                Request(Enumeraveis.Moedas.BTC, "ticker", richTicker);
+                Thread.Sleep(800);
+            }
+        }
+        private void ReadJSONTrades()
+        {
+            while (runningTaskTrades)
+            {
+                Request(Enumeraveis.Moedas.BTC, "trades", richTrade);
                 Thread.Sleep(800);
             }
         }
         
-        public string Request(Enumeraveis.Moedas moeda)
+
+        public string Request(Enumeraveis.Moedas moeda, string tipo, RichTextBox textBox)
         {
             Console.WriteLine("Request " + DateTime.Now.Minute + ":" + DateTime.Now.Second);
-            string totalURL = requestMercadoBitcoin + moeda + "/ticker/";
+            string totalURL = requestMercadoBitcoin + moeda + "/" + tipo + "/";
 
-            return this.HttpGet(totalURL);
+            return this.HttpGet(totalURL, textBox);
         }
 
-        public string HttpGet(string URI)
+        public string HttpGet(string URI, RichTextBox textBox)
         {
             WebClient cliente = new WebClient();
 
@@ -67,12 +77,41 @@ namespace ReadFromBitCoin
             Stream data = cliente.OpenRead(URI);
             StreamReader reader = new StreamReader(data);
             string s = reader.ReadToEnd();
+            Dictionary jSON = Json.JsonParser.FromJson(s);
+            object value = null;
+            if (textBox.InvokeRequired)
+            {
+                if(jSON.TryGetValue("date", out value))
+                {
+                    Console.WriteLine(value);
+                }
+                
+                textBox.Invoke(new Action(() => textBox.Text += s + "\r\n"));
+            }
+            else
+            {
+                textBox.Text += s + "\r\n";
+            }
             data.Close();
             reader.Close();
 
             return s;
         }
 
-
+        private void btnTrades_Click(object sender, EventArgs e)
+        {
+            if (btnTrades.Text.Equals("Stop"))
+            {
+                btnTrades.Text = "Trades";
+                runningTaskTrades = false;
+            }
+            else
+            {
+                btnTrades.Text = "Stop";
+                runningTaskTrades = true;
+                Task.Factory.StartNew(() => { ReadJSONTrades(); });
+            }
+            Application.DoEvents();
+        }
     }
 }
