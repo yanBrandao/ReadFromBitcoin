@@ -19,6 +19,7 @@ using Microsoft.ML.Legacy.Data;
 using Microsoft.ML.Legacy.Transforms;
 using Microsoft.ML.Legacy.Trainers;
 using Microsoft.ML.Legacy.Models;
+using System.Diagnostics;
 
 namespace ReadFromBitCoin
 {
@@ -29,9 +30,11 @@ namespace ReadFromBitCoin
         bool runningTaskMercado = false;
         bool runningTaskTrades = false;
         private static string AppPath => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
-        private static string TrainBitcoinDataPath => Path.Combine(AppPath, "datasets", "bitcoin-train-set.csv");
-        private static string TestBitcoinDataPath => Path.Combine(AppPath, "datasets", "bitcoin-test-set.csv");
+        private static string TrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-train-set.csv");
+        private static string TestBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-test-set.csv");
         private static string ModelPath => Path.Combine(AppPath, "BitCoin.zip");
+
+        List<BitCoinData> input = new List<BitCoinData>();
 
         public Frm_Home()
         {
@@ -123,6 +126,7 @@ namespace ReadFromBitCoin
                 Task.Factory.StartNew(() => { ReadJSONTrades(); });
             }
             Application.DoEvents();
+            Task.Run(() => Frm_Home_LoadAsync(lbScroll));
         }
 
         public void Frm_Home_Load(object sender, EventArgs e)
@@ -132,62 +136,93 @@ namespace ReadFromBitCoin
 
         public async Task Frm_Home_LoadAsync(Label scrollLabel)
         {
-            var model = await TrainAsyncBitcoin(scrollLabel);
+            try
+            {
+                var model = await TrainAsyncBitcoin(scrollLabel);
 
-            // STEP2: Test accuracy
-            EvaluateBitcoin(model, scrollLabel);
+                // STEP2: Test accuracy
+                EvaluateBitcoin(model, scrollLabel);
 
-            // STEP 3: Make a prediction
-            var prediction = model.Predict(TesteBitCoin.Trade);
+                // STEP 3: Make a prediction
+                if (input.Count <= 0)
+                {
+                    var prediction = model.Predict(TesteBitCoin.Trade);
 
-            Console.WriteLine($"I have to trade? {(TesteBitCoin.Trade.Type == 1 ? "Sell" : "Buy")}   Predicted: {(prediction.Decision)}");
+                    string result = $"I have to trade? {(TesteBitCoin.Trade.Type == 1 ? "Sell" : "Buy")}   Predicted: {(prediction.Decision)}";
 
-            Console.ReadLine();
+                    if (scrollLabel.InvokeRequired)
+                    {
+                        scrollLabel.Invoke(new Action(() => scrollLabel.Text += result));
+                    }
+                }
+                else
+                {
+                    foreach(BitCoinData item in input)
+                    {
+                        var prediction = model.Predict(item);
+
+                        string result = $"I have to trade? {(TesteBitCoin.Trade.Type == 1 ? "Sell" : "Buy")}   Predicted: {(prediction.Decision)}";
+
+                        if (scrollLabel.InvokeRequired)
+                        {
+                            scrollLabel.Invoke(new Action(() => scrollLabel.Text += result));
+                        }
+                    }
+                }
+                
+
+            }catch(Exception ex)
+            {
+                Debug.WriteLine("Log Home LoadAsync " + ex.Message);
+            }
         }
 
 
         public static async Task<PredictionModel<BitCoinData, BitCoinPrediction>> TrainAsyncBitcoin(Label scroll)
         {
-            // LearningPipeline holds all steps of the learning process: data, transforms, learners.  
-            var pipeline = new LearningPipeline();
+            PredictionModel<BitCoinData, BitCoinPrediction> model = null;
+            try
+            {// LearningPipeline holds all steps of the learning process: data, transforms, learners.  
+                var pipeline = new LearningPipeline();
 
-            // The TextLoader loads a dataset. The schema of the dataset is specified by passing a class containing
-            // all the column names and their types.
-            pipeline.Add(new TextLoader(TrainBitcoinDataPath).CreateFrom<BitCoinData>(useHeader: true, separator: ','));
+                // The TextLoader loads a dataset. The schema of the dataset is specified by passing a class containing
+                // all the column names and their types.
+                pipeline.Add(new TextLoader(TrainBitcoinDataPath).CreateFrom<BitCoinData>(useHeader: true, separator: ','));
 
-            // Transform any text feature to numeric values
-            //pipeline.Add(new CategoricalOneHotVectorizer(
-            //    "Label"));
+                // Transform any text feature to numeric values
+                //pipeline.Add(new CategoricalOneHotVectorizer(
+                //    "Label"));
 
-            // Put all features into a vector
-            pipeline.Add(new ColumnConcatenator(
-                "Features",
-                "Price",
-                "Amount",
-                "Type"));
+                // Put all features into a vector
+                pipeline.Add(new ColumnConcatenator(
+                    "Features",
+                    "Price",
+                    "Amount",
+                    "Type"));
 
-            // FastTreeBinaryClassifier is an algorithm that will be used to train the model.
-            // It has three hyperparameters for tuning decision tree performance. 
-            pipeline.Add(new FastTreeBinaryClassifier() { NumLeaves = 5, NumTrees = 5, MinDocumentsInLeafs = 2 });
-            //pipeline.Add(new StochasticDualCoordinateAscentClassifier());
+                // FastTreeBinaryClassifier is an algorithm that will be used to train the model.
+                // It has three hyperparameters for tuning decision tree performance. 
+                pipeline.Add(new FastTreeBinaryClassifier() { NumLeaves = 5, NumTrees = 5, MinDocumentsInLeafs = 2 });
+                //pipeline.Add(new StochasticDualCoordinateAscentClassifier());
 
-            if (scroll.InvokeRequired)
-            {
                 scroll.Invoke(new Action(() => scroll.Text += "=============== Training model ===============" + "\r\n"));
+
+                // The pipeline is trained on the dataset that has been loaded and transformed.
+                model = pipeline.Train<BitCoinData, BitCoinPrediction>();
+
+                // Saving the model as a .zip file.
+                await model.WriteAsync(ModelPath);
+
+                scroll.Invoke(new Action(() => scroll.Text += ("=============== End training ===============") + "\r\n"));
+
+                scroll.Invoke(new Action(() => scroll.Text += ("The model is saved to {0}", ModelPath) + "\r\n"));
+
+
             }
-            else
+            catch (Exception ex)
             {
-                scroll.Text += "=============== Training model ===============" + "\r\n";
+                Debug.WriteLine("Erro na Task(TrainAsync)" + ex.Message);
             }
-            // The pipeline is trained on the dataset that has been loaded and transformed.
-            var model = pipeline.Train<BitCoinData, BitCoinPrediction>();
-
-            // Saving the model as a .zip file.
-            await model.WriteAsync(ModelPath);
-
-            scroll.Text += ("=============== End training ===============") + "\r\n";
-            scroll.Text += ("The model is saved to {0}", ModelPath) + "\r\n";
-
             return model;
         }
 
@@ -200,14 +235,8 @@ namespace ReadFromBitCoin
             // BinaryClassificationEvaluator performs evaluation for Binary Classification type of ML problems.
             var evaluator = new BinaryClassificationEvaluator();
 
-            if (scroll.InvokeRequired)
-            {
-                scroll.Invoke(new Action(() => scroll.Text += "=============== Evaluating model ===============" + "\r\n"));
-            }
-            else
-            {
-                scroll.Text += "=============== Evaluating model ===============" + "\r\n";
-            }
+            scroll.Invoke(new Action(() => scroll.Text += "=============== Evaluating model ===============" + "\r\n"));
+            
 
             var metrics = evaluator.Evaluate(model, testData);
             // BinaryClassificationMetrics contains the overall metrics computed by binary classification evaluators
@@ -223,11 +252,11 @@ namespace ReadFromBitCoin
             // The F1 score is the harmonic mean of precision and recall:
             //  2 * precision * recall / (precision + recall).
 
-            scroll.Text += $"Accuracy: {metrics.Accuracy:P2}" + "\r\n";
-            scroll.Text += $"Auc: {metrics.Auc:P2}" + "\r\n";
-            scroll.Text += $"F1Score: {metrics.F1Score:P2}" + "\r\n";
-            scroll.Text += "=============== End evaluating ===============" + "\r\n";
-            scroll.Text += "\r\n";
+            scroll.Invoke(new Action(() => scroll.Text += $"Accuracy: {metrics.Accuracy:P2}" + "\r\n"));
+            scroll.Invoke(new Action(() => scroll.Text += $"Auc: {metrics.Auc:P2}" + "\r\n"));
+            scroll.Invoke(new Action(() => scroll.Text += $"F1Score: {metrics.F1Score:P2}" + "\r\n"));
+            scroll.Invoke(new Action(() => scroll.Text += "=============== End evaluating ===============" + "\r\n"));
+            scroll.Invoke(new Action(() => scroll.Text += "\r\n"));
         }
 
 

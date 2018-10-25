@@ -159,10 +159,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="Dataset\bitcoin-test-set.csv">
+    <None Include="dataset\bitcoin-test-set.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Dataset\bitcoin-train-set.csv">
+    <None Include="dataset\bitcoin-train-set.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
