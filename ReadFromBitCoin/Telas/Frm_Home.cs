@@ -11,6 +11,10 @@ using System.Net;
 using ReadFromBitCoin.Códigos_Auxiliares;
 using System.IO;
 using System.Threading;
+using JArray = Newtonsoft.Json.Linq.JArray;
+
+using Newtonsoft.Json;
+using ReadFromBitCoin.Modelo;
 
 namespace ReadFromBitCoin
 {
@@ -77,15 +81,15 @@ namespace ReadFromBitCoin
             Stream data = cliente.OpenRead(URI);
             StreamReader reader = new StreamReader(data);
             string s = reader.ReadToEnd();
-            Dictionary jSON = Json.JsonParser.FromJson(s);
-            object value = null;
+            JArray trades = JsonConvert.DeserializeObject<JArray>(s);
+            
+            foreach(object item in trades)
+            {
+                
+                Negociacoes trade = JsonConvert.DeserializeObject<Negociacoes>(item.ToString());
+            }
             if (textBox.InvokeRequired)
             {
-                if(jSON.TryGetValue("date", out value))
-                {
-                    Console.WriteLine(value);
-                }
-                
                 textBox.Invoke(new Action(() => textBox.Text += s + "\r\n"));
             }
             else
