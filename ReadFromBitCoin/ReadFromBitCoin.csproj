@@ -10,7 +10,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>ReadFromBitCoin</RootNamespace>
     <AssemblyName>ReadFromBitCoin</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -137,6 +137,7 @@
     <Compile Include="Modelo\BitCoinData.cs" />
     <Compile Include="Modelo\BitCoinPrediction.cs" />
     <Compile Include="Modelo\Negociacoes.cs" />
+    <Compile Include="Modelo\Ticker.cs" />
     <Compile Include="Telas\Frm_Home.cs">
       <SubType>Form</SubType>
     </Compile>
