@@ -21,6 +21,8 @@ using Microsoft.ML.Legacy.Trainers;
 using Microsoft.ML.Legacy.Models;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
+using Microsoft.ML.Runtime;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace ReadFromBitCoin
 {
@@ -29,12 +31,21 @@ namespace ReadFromBitCoin
         double myAmount = 0;
         double myWallet = 500;
 
+        double maxValue;
+        double minValue;
+
+        List<double> chartWallet = new List<double>();
+        List<double> priceWallet = new List<double>();
+
         string requestMercadoBitcoin = "https://www.mercadobitcoin.net/api/";
         bool runningTaskMercado = false;
         bool runningTaskTrades = false;
         private static string AppPath => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
-        private static string TrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-train-set.csv");
-        private static string TestBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-test-set.csv");
+        private static string OldTrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-train-set.csv");
+        private static string OldTestBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-test-set.csv");
+
+        private static string TrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "new-bitcoin-train-set.csv");
+        private static string TestBitcoinDataPath => Path.Combine(AppPath, "dataset", "new-bitcoin-test-set.csv");
         private static string ModelPath => Path.Combine(AppPath, "BitCoin.zip");
 
         List<BitCoinData> input = new List<BitCoinData>();
@@ -46,6 +57,8 @@ namespace ReadFromBitCoin
             vScrollBar1.Dock = DockStyle.Right;
             vScrollBar1.Scroll += (sender, e) => { pTreinamento.VerticalScroll.Value = vScrollBar1.Value; };
             pTreinamento.Controls.Add(vScrollBar1);
+            
+            ReadCoin(Enumeraveis.Moedas.BTC);
         }
 
         private void btnMercadoBitCoin_Click(object sender, EventArgs e)
@@ -64,6 +77,59 @@ namespace ReadFromBitCoin
             Application.DoEvents();
         }
 
+        void ReadCoin(Enumeraveis.Moedas moeda)
+        {
+            String JSON = Request(moeda, "ticker", richTicker);
+            JObject JCoin = JsonConvert.DeserializeObject<JObject>(JSON);
+            Ticker tick = JsonConvert.DeserializeObject<Ticker>(JCoin["ticker"].ToString());
+            minValue = tick.low;
+            maxValue = tick.high;
+
+            String s = Request(Enumeraveis.Moedas.BTC, "trades", richTrade);
+
+            JArray JTrades = JsonConvert.DeserializeObject<JArray>(s);
+
+            foreach (object item in JTrades)
+            {
+
+                Negociacoes trade = JsonConvert.DeserializeObject<Negociacoes>(item.ToString());
+                BitCoinData _bitCoinData = new BitCoinData();
+                _bitCoinData.Date = trade.date;
+                _bitCoinData.Transaction = trade.tid;
+                _bitCoinData.Amount = (float)trade.amount;
+                _bitCoinData.Price = (float)trade.price;
+                _bitCoinData.Type = (trade.type == "sell") ? 1 : 0;
+
+                input.Add(_bitCoinData);
+
+                if (richTrade.InvokeRequired)
+                {
+                    richTrade.Invoke(new Action(() => richTrade.Text += "\r\n"));
+                }
+                else
+                {
+                    richTrade.Text += Convert.ToInt32(_bitCoinData.Date) +
+                                      _bitCoinData.Price + ", " +
+                                      _bitCoinData.Amount + ", " + 
+                                      _bitCoinData.Transaction + "\r\n";
+                }
+            }
+
+            #region Criação da Base de Teste diária
+            if (!File.Exists(TrainBitcoinDataPath))
+            {
+                btnMercadoBitCoin_Click(this, new EventArgs());
+                // Create a file to write to.
+                using (StreamWriter sw = File.CreateText(TrainBitcoinDataPath))
+                {
+                    Console.WriteLine(maxValue);
+                }
+            }
+
+
+            #endregion
+        }
+
         private void ReadJSON()
         {
             while (runningTaskMercado)
@@ -77,13 +143,8 @@ namespace ReadFromBitCoin
             while (runningTaskTrades)
             {
                 Request(Enumeraveis.Moedas.BTC, "trades", richTrade);
-                //if (DialogResult.OK == MessageBox.Show("Você deseja realizar outro treinamento?", "Treinamento", MessageBoxButtons.OKCancel, MessageBoxIcon.Information))
-                //{
-                    Task.Run(() => Frm_Home_LoadAsync(lbScroll));
-                    //runningTaskTrades = false;
-                    //btnTrades.Invoke(new Action(() => btnTrades.Text = "Trades"));
-                
-                System.Threading.Thread.Sleep(30000);
+                Task.Run(() => Frm_Home_LoadAsync(lbScroll));
+                System.Threading.Thread.Sleep(5000);
             }
         }
         
@@ -236,8 +297,38 @@ namespace ReadFromBitCoin
 
                             lbCarteira.Invoke(new Action(() => lbCarteira.Text = "Carteira: " + myWallet));
                             lbMoedas.Invoke(new Action(() => lbMoedas.Text = "Quantidade de Moedas: " + myAmount));
-                            lbHistorico.Invoke(new Action(() => lbHistorico.Items.Add($"Operação de {(item.Type == 1 ? "Venda" : "Compra")} realizada {(deal == true ? "com sucesso." : "sem sucesso. (Falta de Moedas)")} (Quantidade: {item.Amount}) (Valor: {item.Price}) ")));
-                            Application.DoEvents();
+
+                            if (deal)
+                            {
+                                lbHistorico.Invoke(new Action(() => lbHistorico.Items.Add($"Operação de {(item.Type == 1 ? "Venda" : "Compra")} realizada {(deal == true ? "com sucesso." : "sem sucesso. (Falta de Moedas)")} (Quantidade: {item.Amount}) (Valor: {item.Price}) ")));
+                                if (deal && item.Type == 1)
+                                {
+                                    lbHistorico.Invoke(new Action(() => lbHistorico.Items[lbHistorico.Items.Count - 1].BackColor = Color.Green));
+                                    if(graficoCarteira.Series.Count > 0)
+                                        graficoCarteira.Series.RemoveAt(0);
+                                    chartWallet.Add(myWallet);
+                                    priceWallet.Add(item.Price);
+                                    var series = new Series("Finance");
+                                    series.ChartType = SeriesChartType.Line;
+                                    // Frist parameter is X-Axis and Second is Collection of Y- Axis
+                                    series.Points.DataBindXY(priceWallet, chartWallet);
+                                    graficoCarteira.Series.Add(series);
+                                    
+                                }
+                                else if (deal && item.Type == 0)
+                                {
+                                    lbHistorico.Invoke(new Action(() => lbHistorico.Items[lbHistorico.Items.Count - 1].BackColor = Color.Blue));
+                                    if (graficoCarteira.Series.Count > 0)
+                                        graficoCarteira.Series.RemoveAt(0);
+                                    chartWallet.Add(myWallet);
+                                    priceWallet.Add(item.Price);
+                                    var series = new Series("Finance");
+                                    series.ChartType = SeriesChartType.Line;
+                                    // Frist parameter is X-Axis and Second is Collection of Y- Axis
+                                    series.Points.DataBindXY(priceWallet,chartWallet );
+                                    graficoCarteira.Series.Add(series);
+                                }
+                            }
                         }
                         //using (StreamWriter file = new StreamWriter(TrainBitcoinDataPath, true))
                         //{
@@ -277,14 +368,25 @@ namespace ReadFromBitCoin
                 // Put all features into a vector
                 pipeline.Add(new ColumnConcatenator(
                     "Features",
+                    "Date",
                     "Price",
                     "Amount",
+                    "Transaction",
                     "Type"));
 
                 // FastTreeBinaryClassifier is an algorithm that will be used to train the model.
                 // It has three hyperparameters for tuning decision tree performance. 
-                pipeline.Add(new FastTreeBinaryClassifier() { NumLeaves = 5, NumTrees = 5, MinDocumentsInLeafs = 2 });
-                //pipeline.Add(new StochasticDualCoordinateAscentClassifier());
+                pipeline.Add(new FastTreeBinaryClassifier() {
+                    NumTrees = 100,
+                    LearningRates = 0.4f,
+                    DropoutRate = 0.05f
+                });
+                //pipeline.Add(new FastTreeRegressor() {
+                //    NumTrees = 1,
+                //    EarlyStoppingRule = new GLEarlyStoppingCriterion(),
+                //    LearningRates = 0.4f,
+                //    DropoutRate = 0.05f
+                //});
 
                 scroll.Invoke(new Action(() => scroll.Items.Add("=============== Training model ===============" + "\r\n")));
 
@@ -368,10 +470,5 @@ namespace ReadFromBitCoin
             lbScroll.TopIndex = lbScroll.Items.Count - 1;
         }
 
-        private void lbHistorico_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            lbHistorico.SelectedIndex = lbHistorico.Items.Count - 1;
-            lbHistorico.TopIndex = lbHistorico.Items.Count - 1;
-        }
     }
 }

@@ -10,15 +10,21 @@ namespace ReadFromBitCoin.Modelo
     public class BitCoinData
     {
         [Column("0")]
-        public float Price;
+        public float Date;
 
         [Column("1")]
+        public float Price;
+
+        [Column("2")]
         public float Amount;
 
-        [Column(ordinal: "2")]
+        [Column("3")]
+        public float Transaction;
+
+        [Column(ordinal: "4")]
         public float Type;
 
-        [Column(ordinal: "3", name: "Label")]
+        [Column(ordinal: "5", name: "Label")]
         public float Decision;
     }
 }

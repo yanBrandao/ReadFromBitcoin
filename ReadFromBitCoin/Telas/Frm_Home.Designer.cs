@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.btnTicker = new System.Windows.Forms.Button();
             this.btnTrades = new System.Windows.Forms.Button();
             this.richTicker = new System.Windows.Forms.RichTextBox();
@@ -42,14 +44,15 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel7 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.panel5 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
-            this.lbSimulação = new System.Windows.Forms.Label();
-            this.lbCarteira = new System.Windows.Forms.Label();
-            this.lbMoedas = new System.Windows.Forms.Label();
-            this.lbHistorico = new System.Windows.Forms.ListBox();
             this.panel9 = new System.Windows.Forms.Panel();
+            this.lbHistorico = new System.Windows.Forms.ListView();
+            this.lbMoedas = new System.Windows.Forms.Label();
+            this.lbCarteira = new System.Windows.Forms.Label();
+            this.lbSimulação = new System.Windows.Forms.Label();
+            this.panel10 = new System.Windows.Forms.Panel();
+            this.graficoCarteira = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.gbModelo.SuspendLayout();
             this.pTreinamento.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -57,19 +60,19 @@
             this.panel3.SuspendLayout();
             this.panel7.SuspendLayout();
             this.panel4.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.panel5.SuspendLayout();
             this.panel8.SuspendLayout();
             this.panel9.SuspendLayout();
+            this.panel10.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.graficoCarteira)).BeginInit();
             this.SuspendLayout();
             // 
             // btnTicker
             // 
             this.btnTicker.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.btnTicker.Location = new System.Drawing.Point(0, 516);
-            this.btnTicker.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnTicker.Location = new System.Drawing.Point(0, 209);
             this.btnTicker.Name = "btnTicker";
-            this.btnTicker.Size = new System.Drawing.Size(577, 71);
+            this.btnTicker.Size = new System.Drawing.Size(281, 46);
             this.btnTicker.TabIndex = 0;
             this.btnTicker.Text = "Ticker";
             this.btnTicker.UseVisualStyleBackColor = true;
@@ -78,10 +81,9 @@
             // btnTrades
             // 
             this.btnTrades.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.btnTrades.Location = new System.Drawing.Point(0, 516);
-            this.btnTrades.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnTrades.Location = new System.Drawing.Point(0, 209);
             this.btnTrades.Name = "btnTrades";
-            this.btnTrades.Size = new System.Drawing.Size(650, 71);
+            this.btnTrades.Size = new System.Drawing.Size(332, 46);
             this.btnTrades.TabIndex = 1;
             this.btnTrades.Text = "Trades";
             this.btnTrades.UseVisualStyleBackColor = true;
@@ -91,9 +93,8 @@
             // 
             this.richTicker.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTicker.Location = new System.Drawing.Point(0, 0);
-            this.richTicker.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.richTicker.Name = "richTicker";
-            this.richTicker.Size = new System.Drawing.Size(577, 516);
+            this.richTicker.Size = new System.Drawing.Size(281, 209);
             this.richTicker.TabIndex = 2;
             this.richTicker.Text = "";
             this.richTicker.TextChanged += new System.EventHandler(this.richTicker_TextChanged);
@@ -102,9 +103,8 @@
             // 
             this.richTrade.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTrade.Location = new System.Drawing.Point(0, 0);
-            this.richTrade.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.richTrade.Name = "richTrade";
-            this.richTrade.Size = new System.Drawing.Size(650, 516);
+            this.richTrade.Size = new System.Drawing.Size(332, 209);
             this.richTrade.TabIndex = 3;
             this.richTrade.Text = "";
             this.richTrade.TextChanged += new System.EventHandler(this.richTrade_TextChanged);
@@ -114,10 +114,8 @@
             this.gbModelo.Controls.Add(this.pTreinamento);
             this.gbModelo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbModelo.Location = new System.Drawing.Point(0, 0);
-            this.gbModelo.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.gbModelo.Name = "gbModelo";
-            this.gbModelo.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.gbModelo.Size = new System.Drawing.Size(1496, 273);
+            this.gbModelo.Size = new System.Drawing.Size(1073, 213);
             this.gbModelo.TabIndex = 4;
             this.gbModelo.TabStop = false;
             this.gbModelo.Text = "Treinamento";
@@ -126,20 +124,19 @@
             // 
             this.pTreinamento.Controls.Add(this.lbScroll);
             this.pTreinamento.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pTreinamento.Location = new System.Drawing.Point(4, 24);
-            this.pTreinamento.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pTreinamento.Location = new System.Drawing.Point(3, 16);
             this.pTreinamento.Name = "pTreinamento";
-            this.pTreinamento.Size = new System.Drawing.Size(1488, 244);
+            this.pTreinamento.Size = new System.Drawing.Size(1067, 194);
             this.pTreinamento.TabIndex = 1;
             // 
             // lbScroll
             // 
             this.lbScroll.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbScroll.FormattingEnabled = true;
-            this.lbScroll.ItemHeight = 20;
             this.lbScroll.Location = new System.Drawing.Point(0, 0);
+            this.lbScroll.Margin = new System.Windows.Forms.Padding(2);
             this.lbScroll.Name = "lbScroll";
-            this.lbScroll.Size = new System.Drawing.Size(1488, 244);
+            this.lbScroll.Size = new System.Drawing.Size(1067, 194);
             this.lbScroll.TabIndex = 0;
             this.lbScroll.ControlAdded += new System.Windows.Forms.ControlEventHandler(this.lbScroll_ControlAdded);
             this.lbScroll.MouseHover += new System.EventHandler(this.lbScroll_MouseHover);
@@ -150,9 +147,8 @@
             this.panel2.Controls.Add(this.btnTicker);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel2.Location = new System.Drawing.Point(0, 0);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(577, 587);
+            this.panel2.Size = new System.Drawing.Size(281, 255);
             this.panel2.TabIndex = 5;
             // 
             // panel6
@@ -160,9 +156,8 @@
             this.panel6.Controls.Add(this.richTicker);
             this.panel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel6.Location = new System.Drawing.Point(0, 0);
-            this.panel6.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(577, 516);
+            this.panel6.Size = new System.Drawing.Size(281, 209);
             this.panel6.TabIndex = 3;
             // 
             // panel3
@@ -170,10 +165,9 @@
             this.panel3.Controls.Add(this.panel7);
             this.panel3.Controls.Add(this.btnTrades);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel3.Location = new System.Drawing.Point(846, 0);
-            this.panel3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.panel3.Location = new System.Drawing.Point(741, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(650, 587);
+            this.panel3.Size = new System.Drawing.Size(332, 255);
             this.panel3.TabIndex = 6;
             // 
             // panel7
@@ -181,29 +175,18 @@
             this.panel7.Controls.Add(this.richTrade);
             this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel7.Location = new System.Drawing.Point(0, 0);
-            this.panel7.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(650, 516);
+            this.panel7.Size = new System.Drawing.Size(332, 209);
             this.panel7.TabIndex = 4;
             // 
             // panel4
             // 
-            this.panel4.Controls.Add(this.panel1);
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel4.Controls.Add(this.gbModelo);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel4.Location = new System.Drawing.Point(0, 0);
-            this.panel4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(1496, 868);
+            this.panel4.Size = new System.Drawing.Size(1073, 213);
             this.panel4.TabIndex = 7;
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.gbModelo);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1496, 273);
-            this.panel1.TabIndex = 5;
             // 
             // panel5
             // 
@@ -211,10 +194,9 @@
             this.panel5.Controls.Add(this.panel3);
             this.panel5.Controls.Add(this.panel2);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel5.Location = new System.Drawing.Point(0, 281);
-            this.panel5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.panel5.Location = new System.Drawing.Point(0, 520);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(1496, 587);
+            this.panel5.Size = new System.Drawing.Size(1073, 255);
             this.panel5.TabIndex = 8;
             // 
             // panel8
@@ -224,73 +206,95 @@
             this.panel8.Controls.Add(this.lbCarteira);
             this.panel8.Controls.Add(this.lbSimulação);
             this.panel8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel8.Location = new System.Drawing.Point(577, 0);
+            this.panel8.Location = new System.Drawing.Point(281, 0);
+            this.panel8.Margin = new System.Windows.Forms.Padding(2);
             this.panel8.Name = "panel8";
-            this.panel8.Size = new System.Drawing.Size(269, 587);
+            this.panel8.Size = new System.Drawing.Size(460, 255);
             this.panel8.TabIndex = 7;
+            // 
+            // panel9
+            // 
+            this.panel9.Controls.Add(this.lbHistorico);
+            this.panel9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel9.Location = new System.Drawing.Point(0, 39);
+            this.panel9.Margin = new System.Windows.Forms.Padding(2);
+            this.panel9.Name = "panel9";
+            this.panel9.Size = new System.Drawing.Size(460, 216);
+            this.panel9.TabIndex = 4;
+            // 
+            // lbHistorico
+            // 
+            this.lbHistorico.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbHistorico.Location = new System.Drawing.Point(0, 0);
+            this.lbHistorico.Name = "lbHistorico";
+            this.lbHistorico.Size = new System.Drawing.Size(460, 216);
+            this.lbHistorico.TabIndex = 4;
+            this.lbHistorico.UseCompatibleStateImageBehavior = false;
+            // 
+            // lbMoedas
+            // 
+            this.lbMoedas.AutoSize = true;
+            this.lbMoedas.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbMoedas.Location = new System.Drawing.Point(0, 26);
+            this.lbMoedas.Margin = new System.Windows.Forms.Padding(2, 0, 2, 6);
+            this.lbMoedas.Name = "lbMoedas";
+            this.lbMoedas.Size = new System.Drawing.Size(139, 13);
+            this.lbMoedas.TabIndex = 2;
+            this.lbMoedas.Text = "Quantidade de Moedas: 0.0";
+            // 
+            // lbCarteira
+            // 
+            this.lbCarteira.AutoSize = true;
+            this.lbCarteira.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbCarteira.Location = new System.Drawing.Point(0, 13);
+            this.lbCarteira.Margin = new System.Windows.Forms.Padding(2, 0, 2, 6);
+            this.lbCarteira.Name = "lbCarteira";
+            this.lbCarteira.Size = new System.Drawing.Size(81, 13);
+            this.lbCarteira.TabIndex = 1;
+            this.lbCarteira.Text = "Carteira: R$ 0.0";
             // 
             // lbSimulação
             // 
             this.lbSimulação.AutoSize = true;
             this.lbSimulação.Dock = System.Windows.Forms.DockStyle.Top;
             this.lbSimulação.Location = new System.Drawing.Point(0, 0);
+            this.lbSimulação.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbSimulação.Name = "lbSimulação";
-            this.lbSimulação.Size = new System.Drawing.Size(136, 20);
+            this.lbSimulação.Size = new System.Drawing.Size(92, 13);
             this.lbSimulação.TabIndex = 0;
             this.lbSimulação.Text = "Simulação Moeda";
             this.lbSimulação.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lbCarteira
+            // panel10
             // 
-            this.lbCarteira.AutoSize = true;
-            this.lbCarteira.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lbCarteira.Location = new System.Drawing.Point(0, 20);
-            this.lbCarteira.Margin = new System.Windows.Forms.Padding(3, 0, 3, 10);
-            this.lbCarteira.Name = "lbCarteira";
-            this.lbCarteira.Size = new System.Drawing.Size(120, 20);
-            this.lbCarteira.TabIndex = 1;
-            this.lbCarteira.Text = "Carteira: R$ 0.0";
+            this.panel10.Controls.Add(this.graficoCarteira);
+            this.panel10.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel10.Location = new System.Drawing.Point(0, 213);
+            this.panel10.Name = "panel10";
+            this.panel10.Size = new System.Drawing.Size(1073, 307);
+            this.panel10.TabIndex = 6;
             // 
-            // lbMoedas
+            // graficoCarteira
             // 
-            this.lbMoedas.AutoSize = true;
-            this.lbMoedas.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lbMoedas.Location = new System.Drawing.Point(0, 40);
-            this.lbMoedas.Margin = new System.Windows.Forms.Padding(3, 0, 3, 10);
-            this.lbMoedas.Name = "lbMoedas";
-            this.lbMoedas.Size = new System.Drawing.Size(205, 20);
-            this.lbMoedas.TabIndex = 2;
-            this.lbMoedas.Text = "Quantidade de Moedas: 0.0";
-            // 
-            // lbHistorico
-            // 
-            this.lbHistorico.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbHistorico.FormattingEnabled = true;
-            this.lbHistorico.ItemHeight = 20;
-            this.lbHistorico.Location = new System.Drawing.Point(0, 0);
-            this.lbHistorico.Name = "lbHistorico";
-            this.lbHistorico.Size = new System.Drawing.Size(269, 527);
-            this.lbHistorico.TabIndex = 3;
-            this.lbHistorico.SelectedIndexChanged += new System.EventHandler(this.lbHistorico_SelectedIndexChanged);
-            this.lbHistorico.ControlAdded += new System.Windows.Forms.ControlEventHandler(this.lbHistorico_ControlAdded);
-            // 
-            // panel9
-            // 
-            this.panel9.Controls.Add(this.lbHistorico);
-            this.panel9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel9.Location = new System.Drawing.Point(0, 60);
-            this.panel9.Name = "panel9";
-            this.panel9.Size = new System.Drawing.Size(269, 527);
-            this.panel9.TabIndex = 4;
+            chartArea1.Name = "ChartArea1";
+            this.graficoCarteira.ChartAreas.Add(chartArea1);
+            this.graficoCarteira.Dock = System.Windows.Forms.DockStyle.Fill;
+            legend1.Name = "Legend1";
+            this.graficoCarteira.Legends.Add(legend1);
+            this.graficoCarteira.Location = new System.Drawing.Point(0, 0);
+            this.graficoCarteira.Name = "graficoCarteira";
+            this.graficoCarteira.Size = new System.Drawing.Size(1073, 307);
+            this.graficoCarteira.TabIndex = 0;
+            this.graficoCarteira.Text = "Fluxo da Carteira";
             // 
             // Frm_Home
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1496, 868);
+            this.ClientSize = new System.Drawing.Size(1073, 775);
+            this.Controls.Add(this.panel10);
             this.Controls.Add(this.panel5);
             this.Controls.Add(this.panel4);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "Frm_Home";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Frm_Home_Load);
@@ -301,11 +305,12 @@
             this.panel3.ResumeLayout(false);
             this.panel7.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
             this.panel5.ResumeLayout(false);
             this.panel8.ResumeLayout(false);
             this.panel8.PerformLayout();
             this.panel9.ResumeLayout(false);
+            this.panel10.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.graficoCarteira)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -326,13 +331,14 @@
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Panel pTreinamento;
         private System.Windows.Forms.ListBox lbScroll;
-        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel8;
         private System.Windows.Forms.Label lbSimulação;
         private System.Windows.Forms.Label lbMoedas;
         private System.Windows.Forms.Label lbCarteira;
-        private System.Windows.Forms.ListBox lbHistorico;
         private System.Windows.Forms.Panel panel9;
+        private System.Windows.Forms.ListView lbHistorico;
+        private System.Windows.Forms.Panel panel10;
+        private System.Windows.Forms.DataVisualization.Charting.Chart graficoCarteira;
     }
 }
 
