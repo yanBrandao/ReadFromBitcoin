@@ -30,23 +30,32 @@ namespace ReadFromBitCoin
     {
         double myAmount = 0;
         double myWallet = 500;
+        int sinceParam = 2285709;
+        int lerJSONs = 1;
 
         double maxValue;
         double minValue;
 
+        static int contTransações = 0;
+        static int contDias = 0;
+        static int ultimaTransação = 0;
+
         List<double> chartWallet = new List<double>();
+        List<double> chartSell = new List<double>();
         List<double> priceWallet = new List<double>();
 
         string requestMercadoBitcoin = "https://www.mercadobitcoin.net/api/";
         bool runningTaskMercado = false;
         bool runningTaskTrades = false;
-        private static string AppPath => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
-        private static string OldTrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-train-set.csv");
-        private static string OldTestBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-test-set.csv");
 
-        private static string TrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "new-bitcoin-train-set.csv");
-        private static string TestBitcoinDataPath => Path.Combine(AppPath, "dataset", "new-bitcoin-test-set.csv");
+        private static string AppPath => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
+        private static string TrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-train-set.csv");
+        private static string TestBitcoinDataPath => Path.Combine(AppPath, "dataset", "bitcoin-test-set.csv");
+
+        //private static string TrainBitcoinDataPath => Path.Combine(AppPath, "dataset", "new-bitcoin-train-set.csv");
+        //private static string TestBitcoinDataPath => Path.Combine(AppPath, "dataset", "new-bitcoin-test-set.csv");
         private static string ModelPath => Path.Combine(AppPath, "BitCoin.zip");
+
 
         List<BitCoinData> input = new List<BitCoinData>();
 
@@ -58,7 +67,7 @@ namespace ReadFromBitCoin
             vScrollBar1.Scroll += (sender, e) => { pTreinamento.VerticalScroll.Value = vScrollBar1.Value; };
             pTreinamento.Controls.Add(vScrollBar1);
             
-            ReadCoin(Enumeraveis.Moedas.BTC);
+            //ReadCoin(Enumeraveis.Moedas.BTC);
         }
 
         private void btnMercadoBitCoin_Click(object sender, EventArgs e)
@@ -91,7 +100,6 @@ namespace ReadFromBitCoin
 
             foreach (object item in JTrades)
             {
-
                 Negociacoes trade = JsonConvert.DeserializeObject<Negociacoes>(item.ToString());
                 BitCoinData _bitCoinData = new BitCoinData();
                 _bitCoinData.Date = trade.date;
@@ -173,13 +181,13 @@ namespace ReadFromBitCoin
             Ticker tick = JsonConvert.DeserializeObject<Ticker>(trades["ticker"].ToString());
             if (textBox.InvokeRequired)
             {
-                textBox.Invoke(new Action(() => textBox.Text += "=======================================================\r\n"
+                textBox.Invoke(new Action(() => textBox.Text += "================================================\r\n"
                                                              + "Máximo: " + tick.high + "\r\n"
                                                              + "Mínimo: " + tick.low + "\r\n"
                                                              + "Compra: " + tick.buy + "\r\n"
                                                              + "Venda: " + tick.sell + "\r\n"
                                                              + "Data: " + (new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(tick.date).ToString() + "\r\n"
-                                                             + "=======================================================\r\n")));
+                                                             + "=================================================\r\n")));
             }
             else
             {
@@ -197,34 +205,47 @@ namespace ReadFromBitCoin
             WebClient cliente = new WebClient();
 
             cliente.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-
-            Stream data = cliente.OpenRead(URI);
-            StreamReader reader = new StreamReader(data);
-            string s = reader.ReadToEnd();
-            JArray trades = JsonConvert.DeserializeObject<JArray>(s);
+            string s = string.Empty;
             
-            foreach(object item in trades)
+
+            int since = sinceParam;
+            string helpURI = URI;
+            for (int i = 0; i < lerJSONs; i++)
             {
-                
-                Negociacoes trade = JsonConvert.DeserializeObject<Negociacoes>(item.ToString());
+
+                URI = helpURI + "?since=" + since;
+
+                Stream data = cliente.OpenRead(URI);
+                StreamReader reader = new StreamReader(data);
+                s = reader.ReadToEnd();
+                JArray trades = JsonConvert.DeserializeObject<JArray>(s);
                 BitCoinData _bitCoinData = new BitCoinData();
-                _bitCoinData.Amount = (float) trade.amount;
-                _bitCoinData.Price = (float) trade.price;
-                _bitCoinData.Type = (trade.type == "sell") ? 1 : 0;
 
-                input.Add(_bitCoinData);
-            }
-            if (textBox.InvokeRequired)
-            {
-                textBox.Invoke(new Action(() => textBox.Text += s + "\r\n"));
-            }
-            else
-            {
-                textBox.Text += s + "\r\n";
-            }
-            data.Close();
-            reader.Close();
+                foreach (object item in trades)
+                {
 
+                    Negociacoes trade = JsonConvert.DeserializeObject<Negociacoes>(item.ToString());
+                    _bitCoinData = new BitCoinData();
+                    _bitCoinData.Date = trade.date;
+                    _bitCoinData.Transaction = trade.tid;
+                    _bitCoinData.Amount = (float)trade.amount;
+                    _bitCoinData.Price = (float)trade.price;
+                    _bitCoinData.Type = (trade.type == "sell") ? 1 : 0;
+
+                    input.Add(_bitCoinData);
+                }
+                if (textBox.InvokeRequired)
+                {
+                    textBox.Invoke(new Action(() => textBox.Text += s + "\r\n"));
+                }
+                else
+                {
+                    textBox.Text += s + "\r\n";
+                }
+                since = Convert.ToInt32(_bitCoinData.Transaction);
+                data.Close();
+                reader.Close();
+            }
             return s;
         }
 
@@ -246,6 +267,7 @@ namespace ReadFromBitCoin
 
         public void Frm_Home_Load(object sender, EventArgs e)
         {
+            lbHora.Text = "Início: " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString();
             Task.Run(() => Frm_Home_LoadAsync(lbScroll));
         }
 
@@ -287,53 +309,101 @@ namespace ReadFromBitCoin
                                 myAmount -= item.Amount;
                                 deal = true;
                             }
-                            else if(item.Type == 0 && myWallet - (item.Price * item.Amount) > 0)
+                            else if (item.Type == 0 && myWallet - (item.Price * item.Amount) > 0)
                             {
                                 //Se for compra, eu gasto dinheiro e ganho bitCoin.
                                 myWallet -= item.Price * item.Amount;
                                 myAmount += item.Amount;
                                 deal = true;
                             }
-
-                            lbCarteira.Invoke(new Action(() => lbCarteira.Text = "Carteira: " + myWallet));
-                            lbMoedas.Invoke(new Action(() => lbMoedas.Text = "Quantidade de Moedas: " + myAmount));
-
                             if (deal)
                             {
-                                lbHistorico.Invoke(new Action(() => lbHistorico.Items.Add($"Operação de {(item.Type == 1 ? "Venda" : "Compra")} realizada {(deal == true ? "com sucesso." : "sem sucesso. (Falta de Moedas)")} (Quantidade: {item.Amount}) (Valor: {item.Price}) ")));
+                                lbCarteira.Invoke(new Action(() => lbCarteira.Text = "Carteira: " + myWallet));
+                                lbMoedas.Invoke(new Action(() => lbMoedas.Text = "Quantidade de Moedas: " + myAmount));
+
+                                DateTime hoje = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(item.Date);
+                                lbHistorico.Invoke(new Action(() => lbHistorico.Items.Add($"{(item.Type == 1 ? "Venda" : "Compra")} realizada {(deal == true ? "com sucesso." : "sem sucesso. (Falta de Moedas)")} - {hoje.ToShortDateString() + " " + hoje.ToShortTimeString()} - (Quantidade: {item.Amount}) (Valor: {item.Price}) ")));
+
+                                #region Programação do Gráfico
                                 if (deal && item.Type == 1)
                                 {
+                                    if (ultimaTransação == 0)
+                                        ultimaTransação = Convert.ToInt32(item.Date);
+                                    else
+                                    {
+                                        if (item.Date > ultimaTransação)
+                                            contDias++;
+                                        ultimaTransação = Convert.ToInt32(item.Date);
+                                    }
+                                    contTransações++;
+                                    lbTransacoes.Invoke(new Action(() => lbTransacoes.Text = "Quantidade de Transações: " + contTransações));
                                     lbHistorico.Invoke(new Action(() => lbHistorico.Items[lbHistorico.Items.Count - 1].BackColor = Color.Green));
-                                    if(graficoCarteira.Series.Count > 0)
-                                        graficoCarteira.Series.RemoveAt(0);
-                                    chartWallet.Add(myWallet);
-                                    priceWallet.Add(item.Price);
-                                    var series = new Series("Finance");
-                                    series.ChartType = SeriesChartType.Line;
-                                    // Frist parameter is X-Axis and Second is Collection of Y- Axis
-                                    series.Points.DataBindXY(priceWallet, chartWallet);
-                                    graficoCarteira.Series.Add(series);
-                                    
+                                    using (StreamWriter file = new StreamWriter(TestBitcoinDataPath, true))
+                                    {
+                                        file.WriteLine(@"{0}, {1}, {2}, {3}, {4}, {5}", Convert.ToInt32(item.Date), item.Price.ToString("0.000000000"), item.Amount.ToString("0.00000000"), item.Transaction, item.Type, (prediction.Decision == true ? 1 : 0));
+                                    }
+                                    //for (int i = graficoCarteira.Series.Count - 1; i >= 0; i--)
+                                    //{
+                                    //    graficoCarteira.Series.RemoveAt(i);
+                                    //}
+                                    //chartWallet.Clear();
+                                    //chartWallet.Add(myWallet);
+                                    //priceWallet.Add(item.Price);
+                                    //var series = new Series("Venda");
+                                    //series.ChartType = SeriesChartType.Line;
+                                    //// Frist parameter is X-Axis and Second is Collection of Y- Axis
+                                    //series.Points.DataBindXY(priceWallet, chartWallet);
+                                    //graficoCarteira.Series.Add(series);
+
+                                    //var series2 = new Series("Compra");
+                                    //series2.ChartType = SeriesChartType.Line;
+                                    //// Frist parameter is X-Axis and Second is Collection of Y- Axis
+                                    //series2.Points.DataBindXY(priceWallet, chartWallet);
+                                    //graficoCarteira.Series.Add(series2);
+
                                 }
                                 else if (deal && item.Type == 0)
                                 {
+                                    if (ultimaTransação == 0)
+                                        ultimaTransação = Convert.ToInt32(item.Date);
+                                    else
+                                    {
+                                        if (item.Date > ultimaTransação)
+                                            contDias++;
+                                        ultimaTransação = Convert.ToInt32(item.Date);
+                                    }
+
+
+                                    contTransações++;
+                                    lbTransacoes.Invoke(new Action(() => lbTransacoes.Text = "Quantidade de Transações: " + contTransações));
                                     lbHistorico.Invoke(new Action(() => lbHistorico.Items[lbHistorico.Items.Count - 1].BackColor = Color.Blue));
-                                    if (graficoCarteira.Series.Count > 0)
-                                        graficoCarteira.Series.RemoveAt(0);
-                                    chartWallet.Add(myWallet);
-                                    priceWallet.Add(item.Price);
-                                    var series = new Series("Finance");
-                                    series.ChartType = SeriesChartType.Line;
-                                    // Frist parameter is X-Axis and Second is Collection of Y- Axis
-                                    series.Points.DataBindXY(priceWallet,chartWallet );
-                                    graficoCarteira.Series.Add(series);
+                                    using (StreamWriter file = new StreamWriter(TestBitcoinDataPath, true))
+                                    {
+                                        file.WriteLine(@"{0}, {1}, {2}, {3}, {4}, {5}", Convert.ToInt32(item.Date), item.Price.ToString("0.000000000"), item.Amount.ToString("0.00000000"), item.Transaction, item.Type, (prediction.Decision == true ? 1 : 0));
+                                    }
+                                    //    for (int i = graficoCarteira.Series.Count - 1; i >= 0; i--)
+                                    //    {
+                                    //        graficoCarteira.Series.RemoveAt(i);
+                                    //    }
+
+                                    //    chartWallet.Add(myWallet);
+                                    //    priceWallet.Add(item.Price);
+                                    //    var series = new Series("Venda");
+                                    //    series.ChartType = SeriesChartType.Line;
+                                    //    // Frist parameter is X-Axis and Second is Collection of Y- Axis
+                                    //    series.Points.DataBindXY(priceWallet, chartWallet);
+                                    //    graficoCarteira.Series.Add(series);
+
+                                    //    var series2 = new Series("Compra");
+                                    //    series2.ChartType = SeriesChartType.Line;
+                                    //    // Frist parameter is X-Axis and Second is Collection of Y- Axis
+                                    //    series2.Points.DataBindXY(priceWallet, chartWallet);
+                                    //    graficoCarteira.Series.Add(series2);
                                 }
+                                lbDias.Invoke(new Action(() => lbDias.Text = "Dias contabilizados: " + contDias));
+                                #endregion
                             }
                         }
-                        //using (StreamWriter file = new StreamWriter(TrainBitcoinDataPath, true))
-                        //{
-                        //    file.WriteLine(@"{0}, {1}, {2}, {3}", item.Price.ToString("0.000000000"), item.Amount.ToString("0.00000000"), item.Type, (prediction.Decision == true ? 1 : 0));
-                        //}
 
                         if (scrollLabel.InvokeRequired)
                         {

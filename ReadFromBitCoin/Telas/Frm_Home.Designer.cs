@@ -47,10 +47,15 @@
             this.panel5 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
             this.panel9 = new System.Windows.Forms.Panel();
+            this.panel11 = new System.Windows.Forms.Panel();
             this.lbHistorico = new System.Windows.Forms.ListView();
-            this.lbMoedas = new System.Windows.Forms.Label();
-            this.lbCarteira = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lbDias = new System.Windows.Forms.Label();
+            this.lbTransacoes = new System.Windows.Forms.Label();
+            this.lbHora = new System.Windows.Forms.Label();
             this.lbSimulação = new System.Windows.Forms.Label();
+            this.lbCarteira = new System.Windows.Forms.Label();
+            this.lbMoedas = new System.Windows.Forms.Label();
             this.panel10 = new System.Windows.Forms.Panel();
             this.graficoCarteira = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.gbModelo.SuspendLayout();
@@ -63,6 +68,8 @@
             this.panel5.SuspendLayout();
             this.panel8.SuspendLayout();
             this.panel9.SuspendLayout();
+            this.panel11.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.panel10.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.graficoCarteira)).BeginInit();
             this.SuspendLayout();
@@ -202,9 +209,6 @@
             // panel8
             // 
             this.panel8.Controls.Add(this.panel9);
-            this.panel8.Controls.Add(this.lbMoedas);
-            this.panel8.Controls.Add(this.lbCarteira);
-            this.panel8.Controls.Add(this.lbSimulação);
             this.panel8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel8.Location = new System.Drawing.Point(281, 0);
             this.panel8.Margin = new System.Windows.Forms.Padding(2);
@@ -214,33 +218,90 @@
             // 
             // panel9
             // 
-            this.panel9.Controls.Add(this.lbHistorico);
+            this.panel9.AutoSize = true;
+            this.panel9.Controls.Add(this.panel11);
+            this.panel9.Controls.Add(this.panel1);
             this.panel9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel9.Location = new System.Drawing.Point(0, 39);
+            this.panel9.Location = new System.Drawing.Point(0, 0);
             this.panel9.Margin = new System.Windows.Forms.Padding(2);
             this.panel9.Name = "panel9";
-            this.panel9.Size = new System.Drawing.Size(460, 216);
+            this.panel9.Size = new System.Drawing.Size(460, 255);
             this.panel9.TabIndex = 4;
+            // 
+            // panel11
+            // 
+            this.panel11.Controls.Add(this.lbHistorico);
+            this.panel11.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel11.Location = new System.Drawing.Point(0, 100);
+            this.panel11.Name = "panel11";
+            this.panel11.Size = new System.Drawing.Size(460, 155);
+            this.panel11.TabIndex = 8;
             // 
             // lbHistorico
             // 
             this.lbHistorico.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbHistorico.Location = new System.Drawing.Point(0, 0);
             this.lbHistorico.Name = "lbHistorico";
-            this.lbHistorico.Size = new System.Drawing.Size(460, 216);
+            this.lbHistorico.Size = new System.Drawing.Size(460, 155);
             this.lbHistorico.TabIndex = 4;
             this.lbHistorico.UseCompatibleStateImageBehavior = false;
+            this.lbHistorico.View = System.Windows.Forms.View.List;
             // 
-            // lbMoedas
+            // panel1
             // 
-            this.lbMoedas.AutoSize = true;
-            this.lbMoedas.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lbMoedas.Location = new System.Drawing.Point(0, 26);
-            this.lbMoedas.Margin = new System.Windows.Forms.Padding(2, 0, 2, 6);
-            this.lbMoedas.Name = "lbMoedas";
-            this.lbMoedas.Size = new System.Drawing.Size(139, 13);
-            this.lbMoedas.TabIndex = 2;
-            this.lbMoedas.Text = "Quantidade de Moedas: 0.0";
+            this.panel1.Controls.Add(this.lbDias);
+            this.panel1.Controls.Add(this.lbTransacoes);
+            this.panel1.Controls.Add(this.lbHora);
+            this.panel1.Controls.Add(this.lbSimulação);
+            this.panel1.Controls.Add(this.lbCarteira);
+            this.panel1.Controls.Add(this.lbMoedas);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(460, 100);
+            this.panel1.TabIndex = 7;
+            // 
+            // lbDias
+            // 
+            this.lbDias.AutoSize = true;
+            this.lbDias.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbDias.Location = new System.Drawing.Point(0, 52);
+            this.lbDias.Name = "lbDias";
+            this.lbDias.Size = new System.Drawing.Size(110, 13);
+            this.lbDias.TabIndex = 7;
+            this.lbDias.Text = "Dias contabilizados: 0";
+            // 
+            // lbTransacoes
+            // 
+            this.lbTransacoes.AutoSize = true;
+            this.lbTransacoes.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbTransacoes.Location = new System.Drawing.Point(0, 39);
+            this.lbTransacoes.Name = "lbTransacoes";
+            this.lbTransacoes.Size = new System.Drawing.Size(148, 13);
+            this.lbTransacoes.TabIndex = 6;
+            this.lbTransacoes.Text = "Quantidade de Transações: 0";
+            // 
+            // lbHora
+            // 
+            this.lbHora.AutoSize = true;
+            this.lbHora.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbHora.Location = new System.Drawing.Point(0, 26);
+            this.lbHora.Name = "lbHora";
+            this.lbHora.Size = new System.Drawing.Size(40, 13);
+            this.lbHora.TabIndex = 5;
+            this.lbHora.Text = "Início: ";
+            // 
+            // lbSimulação
+            // 
+            this.lbSimulação.AutoSize = true;
+            this.lbSimulação.Dock = System.Windows.Forms.DockStyle.Right;
+            this.lbSimulação.Location = new System.Drawing.Point(368, 26);
+            this.lbSimulação.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lbSimulação.Name = "lbSimulação";
+            this.lbSimulação.Size = new System.Drawing.Size(92, 13);
+            this.lbSimulação.TabIndex = 0;
+            this.lbSimulação.Text = "Simulação Moeda";
+            this.lbSimulação.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbCarteira
             // 
@@ -253,17 +314,16 @@
             this.lbCarteira.TabIndex = 1;
             this.lbCarteira.Text = "Carteira: R$ 0.0";
             // 
-            // lbSimulação
+            // lbMoedas
             // 
-            this.lbSimulação.AutoSize = true;
-            this.lbSimulação.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lbSimulação.Location = new System.Drawing.Point(0, 0);
-            this.lbSimulação.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lbSimulação.Name = "lbSimulação";
-            this.lbSimulação.Size = new System.Drawing.Size(92, 13);
-            this.lbSimulação.TabIndex = 0;
-            this.lbSimulação.Text = "Simulação Moeda";
-            this.lbSimulação.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbMoedas.AutoSize = true;
+            this.lbMoedas.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbMoedas.Location = new System.Drawing.Point(0, 0);
+            this.lbMoedas.Margin = new System.Windows.Forms.Padding(2, 0, 2, 6);
+            this.lbMoedas.Name = "lbMoedas";
+            this.lbMoedas.Size = new System.Drawing.Size(139, 13);
+            this.lbMoedas.TabIndex = 2;
+            this.lbMoedas.Text = "Quantidade de Moedas: 0.0";
             // 
             // panel10
             // 
@@ -309,6 +369,9 @@
             this.panel8.ResumeLayout(false);
             this.panel8.PerformLayout();
             this.panel9.ResumeLayout(false);
+            this.panel11.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.panel10.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.graficoCarteira)).EndInit();
             this.ResumeLayout(false);
@@ -339,6 +402,11 @@
         private System.Windows.Forms.ListView lbHistorico;
         private System.Windows.Forms.Panel panel10;
         private System.Windows.Forms.DataVisualization.Charting.Chart graficoCarteira;
+        private System.Windows.Forms.Label lbTransacoes;
+        private System.Windows.Forms.Label lbHora;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel11;
+        private System.Windows.Forms.Label lbDias;
     }
 }
 
